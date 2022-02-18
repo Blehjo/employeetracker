@@ -2,7 +2,6 @@
 const express = require("express");
 const mysql = require("mysql2");
 const inquirer = require("inquirer");
-// const { application } = require("express");
 const cTable = require("console.table");
 
 const PORT = process.env.PORT || 3001;
@@ -34,7 +33,7 @@ const initDatabase = () => {
                 type: 'list',
                 message: "What would you like to do?",
                 name: 'role',
-                choices: ["View All Employees", "Add Employee", "Update Employee Role", "View All Roles", "Add Role", "View All Departments", "Add Department", "Quit"]
+                choices: ["View All Employees", "View All Departments", "Add Employee", "Update Employee Role", "View All Roles", "Add Role", "Add Department", "Quit"]
             },
         ])
         .then(data => {
@@ -42,23 +41,23 @@ const initDatabase = () => {
                 case 'View All Employees':
                     viewEmployees();
                     break;
+                case 'View All Departments':
+                    viewDepartments();
+                    break;
                 case 'Add Employee':
-                    addManager();
+                    addEmployee();
                     break;
                 case 'Update Employee Role':
-                    addManager();
+                    updateEmployee();
                     break;
                 case 'View All Roles':
-                    addManager();
+                    viewRoles();
                     break;
                 case 'Add Role':
-                    addManager();
-                    break;
-                case 'View All Departments':
-                    addEngineer();
+                    addRole();
                     break;
                 case 'Add Department':
-                    addIntern();
+                    addDepartment();
                     break;
                 default:
                     writeToFile("./dist/index.html", generateHTML(team))
@@ -70,58 +69,122 @@ const initDatabase = () => {
 const viewEmployees = () => {
     // Query database
     db.query('SELECT * FROM employee', function (err, results) {
-        console.log(results);
+        const table = cTable.getTable(results);
+        console.log('')
+        console.log(table);
+    });
+    initDatabase();
+}
+
+// This should show a table of departments
+const viewDepartments = () => {
+    // Query database
+    db.query('SELECT * FROM department', function (err, results) {
+        const table = cTable.getTable(results);
+        console.log('');
+        console.log(table);
+    });
+    initDatabase();
+}
+
+const addEmployee = () => {
+    tv = [];
+    trees = db.query('SELECT first_name, last_name FROM employee', function (err, results) {
+        const table = cTable.getTable(results);
+        // return table
+        console.log(table)
+    })
+    tv.push(trees)
+    console.log(tv)
+    inquirer
+    .prompt([
+        {
+            type: 'input',
+            message: "What is the employee's first name?",
+            name: 'firstname',
+        },
+        {
+            type: 'input',
+            message: "What is the employee's last name?",
+            name: 'lastname',
+        },
+        {
+            type: 'input',
+            message: "What is the employee's role?",
+            name: 'role',
+        },
+        {
+            type: 'list',
+            message: "Who is the employee's manager?",
+            name: 'manager',
+            choices: trees
+        },
+    ])
+    .then(employeeData => {
+        const employee = new Employee(employeeData.firstname, employeeData.lastname, employeeData.role, employeeData.manager)
+        team.push(employee)
+        initDatabase();
+    })
+}
+
+const updateEmployee = () => {
+    inquirer
+    .prompt([
+        {
+            type: 'input',
+            message: "What is the intern's name?",
+            name: 'name',
+        },
+        {
+            type: 'input',
+            message: "What is the intern's id?",
+            name: 'id',
+        },
+        {
+            type: 'input',
+            message: "What is the intern's email?",
+            name: 'email',
+        },
+        {
+            type: 'input',
+            message: "What is the intern's school?",
+            name: 'school',
+        },
+    ])
+    .then(internData => {
+        const intern = new Intern(internData.name, internData.id, internData.email, internData.school)
+        team.push(intern)
+        addEmployee();
+    })
+}
+
+// This should show a table of departments
+const viewRoles = () => {
+    // Query database
+    db.query('SELECT * From roles', function (err, results) {
+        const table = cTable.getTable(results);
+        console.log(table);
     });
 }
 
-const addEngineer = () => {
+const addRole = () => {
     inquirer
         .prompt([
             {
                 type: 'input',
-                message: "What is the engineer's name?",
+                message: "What is the name of the role?",
                 name: 'name',
             },
             {
                 type: 'input',
-                message: "What is the engineer's id?",
-                name: 'id',
+                message: "What is the salary of the role?",
+                name: 'role',
             },
             {
-                type: 'input',
-                message: "What is the engineer's email?",
-                name: 'email',
-            },
-            {
-                type: 'input',
-                message: "What is the engineer's github?",
-                name: 'github',
-            },
-        ])
-        .then(engineerData => {
-            const engineer = new Engineer(engineerData.name, engineerData.id, engineerData.email, engineerData.github)
-            team.push(engineer)
-            addEmployee();
-        })
-}
-
-const addIntern = () => {
-    inquirer
-        .prompt([
-            {
-                type: 'input',
-                message: "What is the intern's name?",
-                name: 'name',
-            },
-            {
-                type: 'input',
-                message: "What is the intern's id?",
-                name: 'id',
-            },
-            {
-                type: 'input',
-                message: "What is the intern's email?",
-                name: 'email',
+                type: 'list',
+                message: "Which department does the role belong to?",
+                name: 'department',
+                choices: ["Engineering", "Finance", "Legal", "Sales"]
             },
             {
                 type: 'input',
@@ -133,6 +196,22 @@ const addIntern = () => {
             const intern = new Intern(internData.name, internData.id, internData.email, internData.school)
             team.push(intern)
             addEmployee();
+        })
+}
+const addDepartment = () => {
+    inquirer
+        .prompt([
+            {
+                type: 'input',
+                message: "What is the name of the department?",
+                name: 'name',
+            }
+        ])
+        .then(departmentData => {
+            console.log("Added Service to the database")
+            const department = new Department(departmentData)
+            companyDb.push(department)
+            initDatabase();
         })
 }
 
