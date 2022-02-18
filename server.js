@@ -3,6 +3,7 @@ const express = require("express");
 const mysql = require("mysql2");
 const inquirer = require("inquirer");
 const cTable = require("console.table");
+const { Department, Employee, Role } = require("./lib/index")
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -110,21 +111,28 @@ const addEmployee = () => {
         },
         {
             type: 'input',
-            message: "What is the employee's role?",
-            name: 'role',
+            message: "What is the employee's title?",
+            name: 'title',
         },
-        {
-            type: 'list',
-            message: "Who is the employee's manager?",
-            name: 'manager',
-            choices: trees
-        },
+        // {
+        //     type: 'list',
+        //     message: "Who is the employee's manager?",
+        //     name: 'manager',
+        //     choices: trees
+        // },
     ])
     .then(employeeData => {
-        const employee = new Employee(employeeData.firstname, employeeData.lastname, employeeData.role, employeeData.manager)
-        team.push(employee)
-        initDatabase();
+        db.query(`INSERT INTO employee (first_name, last_name, title) VALUES (${employeeData.firstname}, ${employeeData.lastname}, ${employeeData.title})`, function (err, results) {
+            const table = cTable.getTable(results);
+            console.log(table)
+            initDatabase();
+        })
     })
+    // .then(employeeData => {
+    //     const employee = new Employee(employeeData.firstname, employeeData.lastname, employeeData.role, employeeData.manager)
+    //     team.push(employee)
+    //     initDatabase();
+    // })
 }
 
 const updateEmployee = () => {
@@ -186,18 +194,14 @@ const addRole = () => {
                 name: 'department',
                 choices: ["Engineering", "Finance", "Legal", "Sales"]
             },
-            {
-                type: 'input',
-                message: "What is the intern's school?",
-                name: 'school',
-            },
         ])
-        .then(internData => {
-            const intern = new Intern(internData.name, internData.id, internData.email, internData.school)
-            team.push(intern)
+        .then(roleData => {
+            const role = new Role(roleData.name, roleData.role, roleData.department)
+            companyDb.push(role)
             addEmployee();
         })
 }
+
 const addDepartment = () => {
     inquirer
         .prompt([
