@@ -3,7 +3,7 @@ const express = require("express");
 const mysql = require("mysql2");
 const inquirer = require("inquirer");
 const cTable = require("console.table");
-const { Department, Employee, Role } = require("./lib/index")
+const { Department, Employee, Role, UpdateEmployee, viewRoles, viewDepartment, viewEmployee } = require("./lib/index")
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -25,8 +25,6 @@ const db = mysql.createConnection(
 
 app.use((req, res) => res.status(404).end())
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
 const initDatabase = () => {
     inquirer
         .prompt([
@@ -40,10 +38,10 @@ const initDatabase = () => {
         .then(data => {
             switch (data.role) {
                 case 'View All Employees':
-                    viewEmployees();
+                    showEmployees();
                     break;
                 case 'View All Departments':
-                    viewDepartments();
+                    showDepartments();
                     break;
                 case 'Add Employee':
                     addEmployee();
@@ -52,7 +50,7 @@ const initDatabase = () => {
                     updateEmployee();
                     break;
                 case 'View All Roles':
-                    viewRoles();
+                    showRoles();
                     break;
                 case 'Add Role':
                     addRole();
@@ -67,36 +65,20 @@ const initDatabase = () => {
 }
 
 // This should show a table of employees
-const viewEmployees = () => {
+const showEmployees = () => {
     // Query database
-    db.query('SELECT * FROM employee', function (err, results) {
-        const table = cTable.getTable(results);
-        console.log('')
-        console.log(table);
-    });
+    viewEmployee();
     initDatabase();
 }
 
 // This should show a table of departments
-const viewDepartments = () => {
+const showDepartments = () => {
     // Query database
-    db.query('SELECT * FROM department', function (err, results) {
-        const table = cTable.getTable(results);
-        console.log('');
-        console.log(table);
-    });
     initDatabase();
+    viewDepartment();
 }
 
 const addEmployee = () => {
-    tv = [];
-    trees = db.query('SELECT first_name, last_name FROM employee', function (err, results) {
-        const table = cTable.getTable(results);
-        // return table
-        console.log(table)
-    })
-    tv.push(trees)
-    console.log(tv)
     inquirer
     .prompt([
         {
@@ -114,6 +96,11 @@ const addEmployee = () => {
             message: "What is the employee's title?",
             name: 'title',
         },
+        {
+            type: 'list',
+            message: "What is the employee's role?",
+            name: 'title',
+        },
         // {
         //     type: 'list',
         //     message: "Who is the employee's manager?",
@@ -122,57 +109,38 @@ const addEmployee = () => {
         // },
     ])
     .then(employeeData => {
-        db.query(`INSERT INTO employee (first_name, last_name, title) VALUES (${employeeData.firstname}, ${employeeData.lastname}, ${employeeData.title})`, function (err, results) {
-            const table = cTable.getTable(results);
-            console.log(table)
-            initDatabase();
-        })
+        const employee = new Employee(employeeData.firstname, employeeData.lastname, employeeData.title, employeeData.roles)
+        employee.addToEmployee();
+        initDatabase();
     })
-    // .then(employeeData => {
-    //     const employee = new Employee(employeeData.firstname, employeeData.lastname, employeeData.role, employeeData.manager)
-    //     team.push(employee)
-    //     initDatabase();
-    // })
 }
 
 const updateEmployee = () => {
     inquirer
     .prompt([
         {
-            type: 'input',
-            message: "What is the intern's name?",
+            type: 'list',
+            message: "What is the name of the employee?",
             name: 'name',
+            choices: []
         },
         {
             type: 'input',
-            message: "What is the intern's id?",
-            name: 'id',
-        },
-        {
-            type: 'input',
-            message: "What is the intern's email?",
-            name: 'email',
-        },
-        {
-            type: 'input',
-            message: "What is the intern's school?",
-            name: 'school',
-        },
+            message: "What is their new role?",
+            name: 'role',
+        }
     ])
-    .then(internData => {
-        const intern = new Intern(internData.name, internData.id, internData.email, internData.school)
-        team.push(intern)
-        addEmployee();
+    .then(updatedData => {
+        const updatedEmployee = new UpdateEmployee(updatedData.role)
+        updatedEmployee.updateEmployee();
+        initDatabase();
     })
 }
 
 // This should show a table of departments
-const viewRoles = () => {
-    // Query database
-    db.query('SELECT * From roles', function (err, results) {
-        const table = cTable.getTable(results);
-        console.log(table);
-    });
+function showRoles() {
+    viewRoles();
+    initDatabase();
 }
 
 const addRole = () => {
@@ -186,7 +154,7 @@ const addRole = () => {
             {
                 type: 'input',
                 message: "What is the salary of the role?",
-                name: 'role',
+                name: 'salary',
             },
             {
                 type: 'list',
@@ -196,9 +164,9 @@ const addRole = () => {
             },
         ])
         .then(roleData => {
-            const role = new Role(roleData.name, roleData.role, roleData.department)
-            companyDb.push(role)
-            addEmployee();
+            const role = new Role(roleData.name, roleData.salary, roleData.department)
+            role.addToRole();
+            initDatabase();
         })
 }
 
@@ -212,18 +180,10 @@ const addDepartment = () => {
             }
         ])
         .then(departmentData => {
-            console.log("Added Service to the database")
-            const department = new Department(departmentData)
-            companyDb.push(department)
+            const department = new Department(departmentData.name)
+            department.addToDepartment();
             initDatabase();
         })
-}
-
-// TODO: Create a function to write README file
-function writeToFile(fileName, data) {
-    fs.writeFile(fileName, data, (err) =>
-        err ? console.log(err) : console.log('Success! The index.html was created in the dist/ folder')
-    );
 }
 
 // TODO: Create a function to initialize app
