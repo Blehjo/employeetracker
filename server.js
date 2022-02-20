@@ -47,7 +47,7 @@ const initDatabase = () => {
                     addEmployee();
                     break;
                 case 'Update Employee Role':
-                    updateEmployee();
+                    newRole();
                     break;
                 case 'View All Roles':
                     showRoles();
@@ -58,8 +58,12 @@ const initDatabase = () => {
                 case 'Add Department':
                     addDepartment();
                     break;
+                case 'Quit':
+                    console.log("Exiting Database");
+                    db.end();
+                    break;
                 default:
-                    writeToFile("./dist/index.html", generateHTML(team))
+                    break;
             }
         })
 }
@@ -74,8 +78,58 @@ const showEmployees = () => {
 // This should show a table of departments
 const showDepartments = () => {
     // Query database
-    initDatabase();
     viewDepartment();
+    initDatabase();
+}
+
+function selectEmployees() {
+    var employeeList = [];
+    db.query("SELECT first_name, last_name FROM employee", function (err, results) {
+        if (err) console.error(err);
+
+        results.forEach(element => employeeList.push(`${element.first_name} ${element.last_name}`))
+
+        employeeList.push(new inquirer.Separator());
+    })
+    return employeeList;
+}
+
+function selectTitle() {
+    var titleList = [];
+    db.query("SELECT title FROM roles", function (err, results) {
+        if (err) console.error(err);
+
+        results.forEach(element => titleList.push(element.title));
+
+        titleList.push(new inquirer.Separator());
+
+    })
+    return titleList;
+}
+
+function selectDepartment() {
+    var departmentList = [];
+    db.query("SELECT name FROM department", function (err, results) {
+        if (err) console.error(err);
+
+        results.forEach(element => departmentList.push(element.name));
+
+        departmentList.push(new inquirer.Separator());
+    })
+    return departmentList;
+}
+
+function selectManager() {
+    var managerList = [];
+    db.query("SELECT first_name, last_name FROM employee", function (err, results) {
+        if (err) console.error(err);
+
+        results.forEach(element => managerList.push(`${element.first_name} ${element.last_name}`));
+
+        managerList.push(new inquirer.Separator());
+
+    })
+    return managerList;
 }
 
 const addEmployee = () => {
@@ -92,47 +146,49 @@ const addEmployee = () => {
             name: 'lastname',
         },
         {
-            type: 'input',
-            message: "What is the employee's title?",
-            name: 'title',
+            type: 'list',
+            message: "What is the employee's role?",
+            name: 'roles',
+            choices: selectTitle()
         },
         {
             type: 'list',
-            message: "What is the employee's role?",
-            name: 'title',
-        },
-        // {
-        //     type: 'list',
-        //     message: "Who is the employee's manager?",
-        //     name: 'manager',
-        //     choices: trees
-        // },
+            message: "Who is the employee's manager?",
+            name: 'manager',
+            choices: selectManager()
+        }
     ])
     .then(employeeData => {
-        const employee = new Employee(employeeData.firstname, employeeData.lastname, employeeData.title, employeeData.roles)
+        const employee = new Employee(employeeData.firstname, employeeData.lastname, employeeData.roles, employeeData.manager)
         employee.addToEmployee();
         initDatabase();
     })
 }
 
-const updateEmployee = () => {
+const newRole = () => {
     inquirer
     .prompt([
         {
-            type: 'list',
-            message: "What is the name of the employee?",
-            name: 'name',
-            choices: []
+            type: 'input',
+            message: "Press Enter To Continue",
+            name: 'name'
         },
         {
-            type: 'input',
+            type: 'list',
+            message: "What is the name of the employee?",
+            name: 'employee',
+            choices: selectEmployees()
+        },
+        {
+            type: 'list',
             message: "What is their new role?",
             name: 'role',
+            choices: selectTitle()
         }
     ])
     .then(updatedData => {
-        const updatedEmployee = new UpdateEmployee(updatedData.role)
-        updatedEmployee.updateEmployee();
+        const updateEmployee = new UpdateEmployee(updatedData.employee, updatedData.role)
+        updateEmployee.updatedEmployee();
         initDatabase();
     })
 }
@@ -160,8 +216,8 @@ const addRole = () => {
                 type: 'list',
                 message: "Which department does the role belong to?",
                 name: 'department',
-                choices: ["Engineering", "Finance", "Legal", "Sales"]
-            },
+                choices: selectDepartment()
+            }
         ])
         .then(roleData => {
             const role = new Role(roleData.name, roleData.salary, roleData.department)
