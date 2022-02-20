@@ -47,7 +47,7 @@ https://user-images.githubusercontent.com/89440573/154863802-79412252-677c-4215-
 
 
 
-  [![A video thumbnail shows the command-line employee management application with a play button overlaying the view.](https://watch.screencastify.com/v/UejLpNtaNS1WMmHz79wE)
+  [A video thumbnail shows the command-line employee tracker application with a play button overlaying the view.](https://watch.screencastify.com/v/UejLpNtaNS1WMmHz79wE)
   
   
   ## License
