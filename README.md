@@ -41,12 +41,13 @@
   ## Mock-Up
 
 
+  The following video shows an example of the application being used from the command line:
+
 https://user-images.githubusercontent.com/89440573/154863802-79412252-677c-4215-bb67-3f10adc667f7.mp4
 
 
-  The following video shows an example of the application being used from the command line:
 
-  [![A video thumbnail shows the command-line employee management application with a play button overlaying the view.](https://user-images.githubusercontent.com/89440573/154863802-79412252-677c-4215-bb67-3f10adc667f7.mp4)](https://watch.screencastify.com/v/UejLpNtaNS1WMmHz79wE)
+  [![A video thumbnail shows the command-line employee management application with a play button overlaying the view.](https://watch.screencastify.com/v/UejLpNtaNS1WMmHz79wE)
   
   
   ## License
