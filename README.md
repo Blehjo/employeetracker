@@ -11,6 +11,7 @@
   * [Usage](#usage)
   * [Contributing](#contributing)
   * [Tests](#tests)
+  * [Mock-Up](#mock-up)
   * [License](#license)
   
   ## Installation
@@ -36,6 +37,12 @@
   *Tests for application and how to run them:*
   
   Currently there are no tests, but the user can interact with the application and test out some of the options.
+
+  ## Mock-Up
+
+  The following video shows an example of the application being used from the command line:
+
+  [![A video thumbnail shows the command-line employee management application with a play button overlaying the view.](./assets/employee-tracker-demo.mp4)](https://watch.screencastify.com/v/UejLpNtaNS1WMmHz79wE)
   
   ## License
   
@@ -43,8 +50,6 @@
   MIT
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-  (https://opensource.org/licenses/MIT)
 
   
   ---
